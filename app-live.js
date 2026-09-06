@@ -1,5 +1,7 @@
 // Live draft extras: shared command bar, position-run detector, team snapshots, and TV mode.
 let bigScreenActive = false;
+let lastTakeoverSignature = '';
+let takeoverTimer = null;
 
 function ensureLiveDraftExtras(){
   const draftPage = document.querySelector('[data-page="draft"]');
@@ -7,6 +9,15 @@ function ensureLiveDraftExtras(){
 
   const hero = draftPage.querySelector('.page-hero');
   hero.insertAdjacentHTML('afterend', `
+    <div class="draft-takeover" id="draftTakeover" aria-live="polite" aria-atomic="true">
+      <div class="takeover-stripe"></div>
+      <div class="takeover-kicker">LIVE DRAFT ALERT</div>
+      <div class="takeover-title" id="takeoverTitle">POSITION RUN</div>
+      <div class="takeover-stat" id="takeoverStat">—</div>
+      <div class="takeover-joke" id="takeoverJoke"></div>
+      <div class="takeover-proof" id="takeoverProof"></div>
+    </div>
+
     <section class="live-command-bar" id="liveCommandBar" aria-label="Live draft command bar">
       <div class="command-primary">
         <span class="command-label">ON THE CLOCK</span>
@@ -135,6 +146,102 @@ function renderLiveCommandBar(){
   }
 }
 
+function trailingPositionStreak(){
+  const picks=sortedLivePicks();
+  if(!picks.length) return {pos:'',count:0};
+  const lastPos=pickPos(picks.at(-1));
+  if(!['QB','RB','WR','TE'].includes(lastPos)) return {pos:'',count:0};
+  let count=0;
+  for(let i=picks.length-1;i>=0;i--){
+    if(pickPos(picks[i])!==lastPos) break;
+    count++;
+  }
+  return {pos:lastPos,count};
+}
+
+function majorRunEvent(){
+  const picks=sortedLivePicks();
+  if(picks.length<4) return null;
+
+  const recent=picks.slice(-6);
+  const counts={QB:0,RB:0,WR:0,TE:0};
+  for(const p of recent){
+    const pos=pickPos(p);
+    if(counts[pos]!=null) counts[pos]++;
+  }
+  const ranked=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const [windowPos,windowCount]=ranked[0] || ['',0];
+  const streak=trailingPositionStreak();
+
+  let pos='', stat='', severity='major', proof='';
+  if(streak.count>=4){
+    pos=streak.pos;
+    stat=`${streak.count} STRAIGHT ${pos} PICKS`;
+    severity=streak.count>=6?'nuclear':streak.count>=5?'huge':'major';
+    proof=`Current trailing streak: ${streak.count} consecutive ${pos}s.`;
+  } else if(windowCount>=4 && recent.length>=6){
+    pos=windowPos;
+    stat=`${windowCount} OF THE LAST 6 PICKS ARE ${pos}`;
+    severity=windowCount===6?'nuclear':windowCount===5?'huge':'major';
+    proof=`Verified from picks #${Number(recent[0].pick_no||0) || Math.max(1,picks.length-5)}–#${Number(recent.at(-1).pick_no||0) || picks.length}.`;
+  } else {
+    return null;
+  }
+
+  const copy={
+    QB:{
+      title:'QUARTERBACK FOMO HAS ENTERED THE CHAT',
+      joke:'Apparently everyone remembered this is Superflex at the exact same time.'
+    },
+    RB:{
+      title:'RUNNING BACK EXTINCTION EVENT',
+      joke:'The room has decided knees are a renewable resource.'
+    },
+    WR:{
+      title:'WIDE RECEIVER PANIC',
+      joke:'Apparently running the football has been canceled until further notice.'
+    },
+    TE:{
+      title:'TIGHT END FEVER',
+      joke:'Medical professionals recommend not drafting six of them.'
+    }
+  }[pos];
+
+  const last=picks.at(-1);
+  const signature=`${pos}|${stat}|${severity}`;
+  return {pos,stat,severity,proof,signature,title:copy.title,joke:copy.joke,lastPick:Number(last?.pick_no||picks.length)};
+}
+
+function hideRunTakeover(){
+  const el=document.querySelector('#draftTakeover');
+  if(el) el.classList.remove('show','major','huge','nuclear');
+  if(takeoverTimer){ clearTimeout(takeoverTimer); takeoverTimer=null; }
+}
+
+function maybeShowRunTakeover(force=false){
+  if(!bigScreenActive) return;
+  const event=majorRunEvent();
+  if(!event){
+    lastTakeoverSignature='';
+    hideRunTakeover();
+    return;
+  }
+  if(!force && event.signature===lastTakeoverSignature) return;
+
+  lastTakeoverSignature=event.signature;
+  const el=document.querySelector('#draftTakeover');
+  if(!el) return;
+
+  document.querySelector('#takeoverTitle').textContent=event.title;
+  document.querySelector('#takeoverStat').textContent=event.stat;
+  document.querySelector('#takeoverJoke').textContent=event.joke;
+  document.querySelector('#takeoverProof').textContent=`${event.proof} · Triggered after pick #${event.lastPick}.`;
+
+  el.className=`draft-takeover show ${event.severity}`;
+  if(takeoverTimer) clearTimeout(takeoverTimer);
+  takeoverTimer=setTimeout(()=>hideRunTakeover(), event.severity==='nuclear'?9000:7000);
+}
+
 function renderPositionRun(){
   const headline=document.querySelector('#runHeadline');
   const recentEl=document.querySelector('#runRecent');
@@ -209,6 +316,7 @@ function renderLiveExtras(){
   renderLiveCommandBar();
   renderPositionRun();
   renderTeamSnapshot();
+  maybeShowRunTakeover();
 }
 
 async function toggleBigScreen(){
@@ -216,6 +324,12 @@ async function toggleBigScreen(){
   document.body.classList.toggle('big-screen',bigScreenActive);
   const btn=document.querySelector('#bigScreenToggle');
   if(btn) btn.textContent=bigScreenActive?'✕ EXIT BIG SCREEN':'▣ BIG SCREEN';
+
+  if(bigScreenActive){
+    setTimeout(()=>maybeShowRunTakeover(true),220);
+  } else {
+    hideRunTakeover();
+  }
 
   if(bigScreenActive && document.documentElement.requestFullscreen && !document.fullscreenElement){
     try{ await document.documentElement.requestFullscreen(); }catch{}
@@ -228,6 +342,7 @@ document.addEventListener('fullscreenchange',()=>{
   if(!document.fullscreenElement && bigScreenActive){
     bigScreenActive=false;
     document.body.classList.remove('big-screen');
+    hideRunTakeover();
     const btn=document.querySelector('#bigScreenToggle');
     if(btn) btn.textContent='▣ BIG SCREEN';
   }
