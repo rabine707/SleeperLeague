@@ -14,8 +14,20 @@
   <header class="topbar"><button class="brand" data-route="home" aria-label="Bape Jesus Fantasy Football home"><span class="brand-mark">BJ</span><span class="brand-copy"><b>BAPE JESUS</b><small>FANTASY FOOTBALL</small></span></button><nav class="nav" aria-label="Main navigation"><button data-route="home" class="active">Home</button><button data-route="draft">Draft</button><button data-route="managers">Managers</button><button data-route="history">History</button><button data-route="scouting">Scouting</button></nav><div class="live-pill" id="apiStatus"><span></span> Sleeper</div></header>
   <main>
     <section class="page active" data-page="home">
-      <div class="hero-shell"><div class="hero-copy"><div class="eyebrow">2026 SEASON // YEAR OF THE SICKO</div><h1><span>BAPE JESUS</span><br>FANTASY FOOTBALL</h1><p class="hero-sub">12 teams. Superflex. 6-point passing TDs. First-down bonuses. Bad decisions immortalized forever.</p>
-        <div class="anthem-player" id="anthemPlayer"><button class="anthem-play" id="anthemPlay" aria-label="Play RIP Gyroball">▶</button><div class="anthem-info"><div class="anthem-label">BAPE JESUS RADIO // 2026 LEAGUE ANTHEM</div><div class="anthem-title">RIP GYROBALL</div><div class="anthem-track"><span class="anthem-time" id="anthemCurrent">0:00</span><input class="anthem-progress" id="anthemProgress" type="range" min="0" max="1" value="0" step="0.1" aria-label="Song progress"><span class="anthem-time" id="anthemDuration">1:19</span></div></div><label class="anthem-volume" aria-label="Volume">🔊 <input id="anthemVolume" type="range" min="0" max="1" value="0.8" step="0.05"></label><audio id="leagueAnthem" preload="metadata" src="./rip-gyroball-theme.mp3"></audio></div>
+      <section class="anthem-gate" id="anthemGate" aria-label="2026 League Anthem">
+        <div class="anthem-gate-glow" aria-hidden="true"></div>
+        <div class="anthem-gate-kicker">BAPE JESUS PRESENTS // 2026</div>
+        <h1>WAIT.<br><span>BEFORE YOU ENTER.</span></h1>
+        <p class="anthem-gate-copy">There is league business to handle first.</p>
+        <div class="anthem-song-name">RIP GYROBALL</div>
+        <button class="anthem-enter" id="anthemPlay" type="button"><span class="anthem-enter-icon">▶</span><span><small>2026 LEAGUE ANTHEM</small>PLAY THIS BEFORE ENTERING</span></button>
+        <div class="anthem-joke">He isn't dead. He's just taking the year off.</div>
+        <div class="anthem-track anthem-gate-track"><span class="anthem-time" id="anthemCurrent">0:00</span><input class="anthem-progress" id="anthemProgress" type="range" min="0" max="1" value="0" step="0.1" aria-label="Song progress"><span class="anthem-time" id="anthemDuration">1:19</span></div>
+        <label class="anthem-volume" aria-label="Volume">🔊 <input id="anthemVolume" type="range" min="0" max="1" value="0.8" step="0.05"></label>
+        <div class="anthem-scroll-cue">↓ SITE BELOW ↓</div>
+        <audio id="leagueAnthem" preload="metadata" src="./rip-gyroball-theme.mp3"></audio>
+      </section>
+      <div class="hero-shell" id="leagueHome"><div class="hero-copy"><div class="eyebrow">2026 SEASON // YEAR OF THE SICKO</div><h1><span>BAPE JESUS</span><br>FANTASY FOOTBALL</h1><p class="hero-sub">12 teams. Superflex. 6-point passing TDs. First-down bonuses. Bad decisions immortalized forever.</p>
         <div class="hero-actions"><button class="btn primary" data-route="draft">Enter Draft Room</button><button class="btn ghost" data-route="scouting">Scout the Ops</button></div><div class="format-strip"><span>12 TEAMS</span><span>SUPERFLEX</span><span>FULL PPR</span><span>6PT PASS TD</span><span>1PT 1ST DOWN</span></div></div>
         <aside class="draft-clock-card holo-card"><div class="micro">NEXT EVENT</div><div class="clock-title">2026 LIVE DRAFT</div><div class="countdown" id="countdown">--:--:--</div><div class="clock-date" id="draftDate">Loading draft time…</div><div class="your-picks"><div><small>LEAGUE MODE</small><strong>SHARED</strong></div><div><small>DRAFT SIZE</small><strong>216 PICKS</strong></div></div></aside></div>
       <div class="section-head"><div><div class="kicker">THE ROOM</div><h2>Draft Order</h2></div><div class="order-actions"><button class="rail-btn" id="orderPrev" aria-label="Scroll draft order left">←</button><button class="rail-btn" id="orderNext" aria-label="Scroll draft order right">→</button><button class="text-btn" data-route="managers">Meet all 12 →</button></div></div><div class="draft-order-rail" id="draftOrderRail"></div>
