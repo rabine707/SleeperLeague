@@ -48,3 +48,38 @@ body.big-screen .page{display:none!important}body.big-screen .page[data-page="dr
 body.big-screen .live-command-bar{top:0;margin-bottom:8px;border-radius:14px}body.big-screen .war-grid{display:block}body.big-screen .draft-board-shell{border-radius:14px}body.big-screen .draft-board{max-height:calc(100vh - 104px)}body.big-screen .board-grid{min-width:100%}body.big-screen .board-cell{min-height:60px}body.big-screen .board-cell.header{min-height:66px}
 @media(max-width:1050px){.live-command-bar{grid-template-columns:1fr auto auto}.command-meta{grid-column:1/-1;grid-row:2}.draft-insights-grid{grid-template-columns:1fr}.snapshot-roster{grid-template-columns:1fr 1fr}}
 @media(max-width:680px){.live-command-bar{top:61px;grid-template-columns:1fr auto;padding:10px}.command-primary{grid-column:1/-1}.command-meta{grid-template-columns:1fr 1fr}.run-chip{display:none}.tv-mode-btn{grid-column:2}.draft-insights-grid{grid-template-columns:1fr}.snapshot-counts{gap:5px}.snapshot-count{padding:8px}.snapshot-roster{grid-template-columns:1fr}.run-headline{font-size:22px}}
+
+
+/* === Big-screen broadcast run takeovers === */
+.draft-takeover{display:none}
+body.big-screen .draft-takeover{
+  display:flex;position:fixed;z-index:120;left:50%;top:50%;width:min(1180px,88vw);min-height:330px;
+  transform:translate(-50%,-46%) scale(.92);opacity:0;pointer-events:none;overflow:hidden;
+  flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:46px 60px;
+  border:1px solid rgba(255,255,255,.18);border-radius:28px;
+  background:
+    radial-gradient(circle at 20% 0%,rgba(200,255,46,.15),transparent 32%),
+    radial-gradient(circle at 82% 100%,rgba(170,92,255,.22),transparent 34%),
+    rgba(6,7,11,.97);
+  box-shadow:0 40px 120px rgba(0,0,0,.72),inset 0 0 80px rgba(255,255,255,.02);
+  transition:opacity .28s ease,transform .38s cubic-bezier(.2,.8,.2,1)
+}
+body.big-screen .draft-takeover.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+body.big-screen .draft-takeover:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.018) 0 2px,transparent 2px 11px);pointer-events:none}
+.takeover-stripe{position:absolute;left:0;right:0;top:0;height:7px;background:linear-gradient(90deg,var(--lime),var(--cyan),var(--purple),var(--lime));background-size:220% 100%;animation:takeoverSweep 2.2s linear infinite}
+.takeover-kicker{position:relative;color:var(--lime);font-size:13px;font-weight:1000;letter-spacing:.24em;text-transform:uppercase;margin-bottom:14px}
+.takeover-title{position:relative;font-size:clamp(34px,4.6vw,76px);line-height:.92;font-weight:1000;letter-spacing:-.055em;text-transform:uppercase;max-width:980px}
+.takeover-stat{position:relative;margin-top:18px;font-size:clamp(26px,3.3vw,54px);font-weight:1000;letter-spacing:-.035em;color:white;text-transform:uppercase}
+.takeover-joke{position:relative;margin-top:16px;font-size:clamp(15px,1.35vw,22px);font-weight:800;color:#c5c9d4;max-width:850px}
+.takeover-proof{position:relative;margin-top:22px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;color:#7f8595;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.03)}
+body.big-screen .draft-takeover.huge{border-color:rgba(255,200,87,.42)}
+body.big-screen .draft-takeover.huge .takeover-kicker{color:var(--gold)}
+body.big-screen .draft-takeover.nuclear{width:min(1360px,92vw);min-height:390px;border:2px solid rgba(255,77,109,.64);box-shadow:0 40px 140px rgba(0,0,0,.8),0 0 80px rgba(255,77,109,.16),inset 0 0 100px rgba(255,77,109,.05);animation:takeoverPulse 1s ease-in-out infinite alternate}
+body.big-screen .draft-takeover.nuclear .takeover-kicker{color:#ff718b}
+body.big-screen .draft-takeover.nuclear .takeover-title{font-size:clamp(44px,5.5vw,92px)}
+@keyframes takeoverSweep{to{background-position:-220% 0}}
+@keyframes takeoverPulse{from{filter:none}to{filter:brightness(1.12)}}
+@media(max-width:900px){
+  body.big-screen .draft-takeover{width:92vw;min-height:280px;padding:34px 26px}
+  .takeover-proof{max-width:90%;line-height:1.35;border-radius:14px}
+}
