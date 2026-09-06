@@ -16,19 +16,30 @@
   const icon = play.querySelector('.anthem-enter-icon');
   const copy = play.querySelector('span:last-child');
   let collapseTimer;
+  let durationReady = false;
   const fmt = seconds => {
     if (!Number.isFinite(seconds)) return '0:00';
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
+  const syncRanges = () => {
+    if (!durationReady) return;
+    progress.value = String(audio.currentTime);
+    if (miniProgress) miniProgress.value = String(audio.currentTime);
+  };
   const showMini = () => {
+    const oldGateHeight = gate.getBoundingClientRect().height;
+    const oldY = window.scrollY;
     gate.classList.add('collapsing');
-    window.setTimeout(() => gate.classList.add('dismissed'), 560);
     mini.classList.add('visible');
     document.body.classList.add('anthem-active');
     try { sessionStorage.setItem('bapeAnthemEntered','1'); } catch (_) {}
-    window.setTimeout(() => document.getElementById('leagueHome')?.scrollIntoView({behavior:'smooth',block:'start'}), 300);
+    window.setTimeout(() => {
+      gate.classList.add('dismissed');
+      const targetY = Math.max(0, oldY - oldGateHeight + 90);
+      window.scrollTo({top:targetY,behavior:'smooth'});
+    }, 560);
   };
   const showGate = () => {
     clearTimeout(collapseTimer);
@@ -40,6 +51,8 @@
   };
 
   audio.volume = .8;
+  progress.value = '0';
+  if (miniProgress) miniProgress.value = '0';
   if (volume) volume.value = audio.volume;
   try {
     if (sessionStorage.getItem('bapeAnthemEntered') === '1') {
@@ -75,19 +88,32 @@
     play.setAttribute('aria-label','Play RIP Gyroball');
   });
   audio.addEventListener('loadedmetadata', () => {
-    const max = audio.duration || 1;
+    if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+    durationReady = true;
     duration.textContent = fmt(audio.duration);
-    progress.max = max;
-    if (miniProgress) miniProgress.max = max;
+    progress.max = String(audio.duration);
+    progress.step = '0.1';
+    if (miniProgress) {
+      miniProgress.max = String(audio.duration);
+      miniProgress.step = '0.1';
+    }
+    syncRanges();
   });
   audio.addEventListener('timeupdate', () => {
     current.textContent = fmt(audio.currentTime);
-    progress.value = audio.currentTime;
-    if (miniProgress) miniProgress.value = audio.currentTime;
     if (miniTime) miniTime.textContent = fmt(audio.currentTime);
+    syncRanges();
   });
-  audio.addEventListener('ended', () => { audio.currentTime = 0; });
-  progress.addEventListener('input', () => { audio.currentTime = Number(progress.value); });
-  miniProgress?.addEventListener('input', () => { audio.currentTime = Number(miniProgress.value); });
+  audio.addEventListener('ended', () => { audio.currentTime = 0; syncRanges(); });
+  progress.addEventListener('input', () => {
+    if (!durationReady) return;
+    const next = Math.min(audio.duration, Math.max(0, Number(progress.value)));
+    if (Number.isFinite(next)) audio.currentTime = next;
+  });
+  miniProgress?.addEventListener('input', () => {
+    if (!durationReady) return;
+    const next = Math.min(audio.duration, Math.max(0, Number(miniProgress.value)));
+    if (Number.isFinite(next)) audio.currentTime = next;
+  });
   volume?.addEventListener('input', () => { audio.volume = Number(volume.value); });
 })();
