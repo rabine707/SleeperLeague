@@ -2,6 +2,31 @@
 let bigScreenActive = false;
 let lastTakeoverSignature = '';
 let takeoverTimer = null;
+const demoRunParam = new URLSearchParams(location.search).get('demoRun');
+
+function demoRunEvent(){
+  if(!demoRunParam) return null;
+  const match=String(demoRunParam).toUpperCase().match(/^(QB|RB|WR|TE)([4-6])$/);
+  if(!match) return null;
+  const [,pos,countText]=match;
+  const count=Number(countText);
+  const copy={
+    QB:{title:'QUARTERBACK FOMO HAS ENTERED THE CHAT',joke:'Apparently everyone remembered this is Superflex at the exact same time.'},
+    RB:{title:'RUNNING BACK EXTINCTION EVENT',joke:'The room has decided knees are a renewable resource.'},
+    WR:{title:'WIDE RECEIVER PANIC',joke:'Apparently running the football has been canceled until further notice.'},
+    TE:{title:'TIGHT END FEVER',joke:'Medical professionals recommend not drafting six of them.'}
+  }[pos];
+  return {
+    pos,
+    stat:`${count} STRAIGHT ${pos} PICKS`,
+    severity:count>=6?'nuclear':count===5?'huge':'major',
+    proof:'DEMO MODE — simulated locally for visual testing only.',
+    signature:`DEMO|${pos}|${count}`,
+    title:copy.title,
+    joke:copy.joke,
+    lastPick:count
+  };
+}
 
 function ensureLiveDraftExtras(){
   const draftPage = document.querySelector('[data-page="draft"]');
@@ -160,6 +185,8 @@ function trailingPositionStreak(){
 }
 
 function majorRunEvent(){
+  const demo=demoRunEvent();
+  if(demo) return demo;
   const picks=sortedLivePicks();
   if(picks.length<4) return null;
 
@@ -235,7 +262,7 @@ function maybeShowRunTakeover(force=false){
   document.querySelector('#takeoverTitle').textContent=event.title;
   document.querySelector('#takeoverStat').textContent=event.stat;
   document.querySelector('#takeoverJoke').textContent=event.joke;
-  document.querySelector('#takeoverProof').textContent=`${event.proof} · Triggered after pick #${event.lastPick}.`;
+  document.querySelector('#takeoverProof').textContent=event.signature.startsWith('DEMO|') ? event.proof : `${event.proof} · Triggered after pick #${event.lastPick}.`;
 
   el.className=`draft-takeover show ${event.severity}`;
   if(takeoverTimer) clearTimeout(takeoverTimer);
@@ -355,3 +382,10 @@ document.addEventListener('keydown',e=>{
 setInterval(renderLiveExtras,1000);
 ensureLiveDraftExtras();
 renderLiveExtras();
+
+if(demoRunParam){
+  const bar=document.querySelector('#liveCommandBar');
+  if(bar){
+    bar.insertAdjacentHTML('beforeend','<span class="demo-mode-badge">DEMO MODE</span>');
+  }
+}
