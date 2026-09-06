@@ -266,7 +266,7 @@ function maybeShowRunTakeover(force=false){
 
   el.className=`draft-takeover show ${event.severity}`;
   if(takeoverTimer) clearTimeout(takeoverTimer);
-  takeoverTimer=setTimeout(()=>hideRunTakeover(), event.severity==='nuclear'?9000:7000);
+  takeoverTimer=setTimeout(()=>hideRunTakeover(), event.severity==='nuclear'?5500:4000);
 }
 
 function renderPositionRun(){
