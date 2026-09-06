@@ -1,20 +1,14 @@
 (() => {
-  const audio=document.getElementById('leagueAnthem'),gate=document.getElementById('anthemGate'),play=document.getElementById('anthemPlay'),progress=document.getElementById('anthemProgress'),current=document.getElementById('anthemCurrent'),duration=document.getElementById('anthemDuration'),volume=document.getElementById('anthemVolume'),mini=document.getElementById('anthemMini'),miniPlay=document.getElementById('anthemMiniPlay'),miniProgress=document.getElementById('anthemMiniProgress'),miniTime=document.getElementById('anthemMiniTime'),expand=document.getElementById('anthemExpand'),close=document.getElementById('anthemClose'),reopen=document.getElementById('anthemReopen');
-  if(!audio||!play||!progress||!gate||!mini)return;
-  const icon=play.querySelector('.anthem-enter-icon'),copy=play.querySelector('span:last-child');let collapseTimer,durationReady=false;
+  const audio=document.getElementById('leagueAnthem'),play=document.getElementById('anthemMiniPlay'),progress=document.getElementById('anthemMiniProgress'),time=document.getElementById('anthemMiniTime');
+  if(!audio||!play)return;
+  let ready=false;
   const fmt=s=>{if(!Number.isFinite(s))return'0:00';return`${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`};
-  const syncRanges=()=>{if(!durationReady)return;progress.value=String(audio.currentTime);if(miniProgress)miniProgress.value=String(audio.currentTime)};
-  const showMini=()=>{const h=gate.getBoundingClientRect().height,y=window.scrollY;gate.classList.add('collapsing');mini.classList.add('visible');reopen?.classList.remove('visible');document.body.classList.add('anthem-active');try{sessionStorage.setItem('bapeAnthemEntered','1')}catch(_){}window.setTimeout(()=>{gate.classList.add('dismissed');window.scrollTo({top:Math.max(0,y-h+90),behavior:'smooth'})},560)};
-  const showGate=()=>{clearTimeout(collapseTimer);gate.classList.remove('dismissed');requestAnimationFrame(()=>gate.classList.remove('collapsing'));mini.classList.remove('visible');reopen?.classList.remove('visible');document.body.classList.remove('anthem-active');window.scrollTo({top:0,behavior:'smooth'})};
-  const closePlayer=()=>{audio.pause();mini.classList.remove('visible');document.body.classList.remove('anthem-active');reopen?.classList.add('visible');try{sessionStorage.setItem('bapeAnthemClosed','1')}catch(_){}};
-  const reopenPlayer=()=>{mini.classList.add('visible');reopen?.classList.remove('visible');document.body.classList.add('anthem-active');try{sessionStorage.removeItem('bapeAnthemClosed')}catch(_){}};
-  audio.volume=.8;progress.value='0';if(miniProgress)miniProgress.value='0';if(volume)volume.value=audio.volume;
-  try{if(sessionStorage.getItem('bapeAnthemEntered')==='1'){gate.classList.add('dismissed');if(sessionStorage.getItem('bapeAnthemClosed')==='1')reopen?.classList.add('visible');else{mini.classList.add('visible');document.body.classList.add('anthem-active')}}}catch(_){}
-  play.addEventListener('click',async()=>{if(audio.paused){try{await audio.play();collapseTimer=window.setTimeout(showMini,2600)}catch(_){return}}else audio.pause()});
-  miniPlay?.addEventListener('click',async()=>{if(audio.paused){try{await audio.play()}catch(_){}}else audio.pause()});expand?.addEventListener('click',showGate);close?.addEventListener('click',closePlayer);reopen?.addEventListener('click',reopenPlayer);
-  audio.addEventListener('play',()=>{play.classList.add('playing');if(icon)icon.textContent='Ⅱ';if(copy)copy.innerHTML='<small>NOW PLAYING // 2026 LEAGUE ANTHEM</small>RIP GYROBALL';if(miniPlay)miniPlay.textContent='Ⅱ';play.setAttribute('aria-label','Pause RIP Gyroball')});
-  audio.addEventListener('pause',()=>{clearTimeout(collapseTimer);play.classList.remove('playing');if(icon)icon.textContent='▶';if(copy)copy.innerHTML='<small>2026 LEAGUE ANTHEM</small>PLAY THIS BEFORE ENTERING';if(miniPlay)miniPlay.textContent='▶';play.setAttribute('aria-label','Play RIP Gyroball')});
-  audio.addEventListener('loadedmetadata',()=>{if(!Number.isFinite(audio.duration)||audio.duration<=0)return;durationReady=true;duration.textContent=fmt(audio.duration);progress.max=String(audio.duration);progress.step='0.1';if(miniProgress){miniProgress.max=String(audio.duration);miniProgress.step='0.1'}syncRanges()});
-  audio.addEventListener('timeupdate',()=>{current.textContent=fmt(audio.currentTime);if(miniTime)miniTime.textContent=fmt(audio.currentTime);syncRanges()});audio.addEventListener('ended',()=>{audio.currentTime=0;syncRanges()});
-  progress.addEventListener('input',()=>{if(!durationReady)return;const n=Math.min(audio.duration,Math.max(0,Number(progress.value)));if(Number.isFinite(n))audio.currentTime=n});miniProgress?.addEventListener('input',()=>{if(!durationReady)return;const n=Math.min(audio.duration,Math.max(0,Number(miniProgress.value)));if(Number.isFinite(n))audio.currentTime=n});volume?.addEventListener('input',()=>{audio.volume=Number(volume.value)});
+  audio.volume=.8;
+  play.addEventListener('click',async()=>{if(audio.paused){try{await audio.play()}catch(_){}}else audio.pause()});
+  audio.addEventListener('play',()=>{play.textContent='Ⅱ';play.setAttribute('aria-label','Pause RIP Gyroball')});
+  audio.addEventListener('pause',()=>{play.textContent='▶';play.setAttribute('aria-label','Play RIP Gyroball')});
+  audio.addEventListener('loadedmetadata',()=>{if(!Number.isFinite(audio.duration)||audio.duration<=0)return;ready=true;if(progress){progress.max=String(audio.duration);progress.step='0.1'}});
+  audio.addEventListener('timeupdate',()=>{if(time)time.textContent=fmt(audio.currentTime);if(progress&&ready)progress.value=String(audio.currentTime)});
+  audio.addEventListener('ended',()=>{audio.currentTime=0;if(progress)progress.value='0'});
+  progress?.addEventListener('input',()=>{if(!ready)return;const n=Math.min(audio.duration,Math.max(0,Number(progress.value)));if(Number.isFinite(n))audio.currentTime=n});
 })();
