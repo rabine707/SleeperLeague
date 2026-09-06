@@ -83,3 +83,5 @@ body.big-screen .draft-takeover.nuclear .takeover-title{font-size:clamp(44px,5.5
   body.big-screen .draft-takeover{width:92vw;min-height:280px;padding:34px 26px}
   .takeover-proof{max-width:90%;line-height:1.35;border-radius:14px}
 }
+
+.demo-mode-badge{position:absolute;right:14px;top:-10px;padding:4px 8px;border-radius:999px;background:var(--gold);color:#16110a;font-size:7px;font-weight:1000;letter-spacing:.12em;box-shadow:0 4px 18px rgba(255,200,87,.18)}
