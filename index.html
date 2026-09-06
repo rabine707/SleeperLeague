@@ -7,152 +7,25 @@
   <title>Bape Jesus Fantasy Football</title>
   <meta name="description" content="Bape Jesus Fantasy Football — live draft, league history, manager scouting, and chaos." />
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./anthem.css" />
 </head>
 <body>
-  <div class="noise" aria-hidden="true"></div>
-  <div class="orb orb-a" aria-hidden="true"></div>
-  <div class="orb orb-b" aria-hidden="true"></div>
-
-  <header class="topbar">
-    <button class="brand" data-route="home" aria-label="Bape Jesus Fantasy Football home">
-      <span class="brand-mark">BJ</span>
-      <span class="brand-copy"><b>BAPE JESUS</b><small>FANTASY FOOTBALL</small></span>
-    </button>
-    <nav class="nav" aria-label="Main navigation">
-      <button data-route="home" class="active">Home</button>
-      <button data-route="draft">Draft</button>
-      <button data-route="managers">Managers</button>
-      <button data-route="history">History</button>
-      <button data-route="scouting">Scouting</button>
-    </nav>
-    <div class="live-pill" id="apiStatus"><span></span> Sleeper</div>
-  </header>
-
+  <div class="noise" aria-hidden="true"></div><div class="orb orb-a" aria-hidden="true"></div><div class="orb orb-b" aria-hidden="true"></div>
+  <header class="topbar"><button class="brand" data-route="home" aria-label="Bape Jesus Fantasy Football home"><span class="brand-mark">BJ</span><span class="brand-copy"><b>BAPE JESUS</b><small>FANTASY FOOTBALL</small></span></button><nav class="nav" aria-label="Main navigation"><button data-route="home" class="active">Home</button><button data-route="draft">Draft</button><button data-route="managers">Managers</button><button data-route="history">History</button><button data-route="scouting">Scouting</button></nav><div class="live-pill" id="apiStatus"><span></span> Sleeper</div></header>
   <main>
     <section class="page active" data-page="home">
-      <div class="hero-shell">
-        <div class="hero-copy">
-          <div class="eyebrow">2026 SEASON // YEAR OF THE SICKO</div>
-          <h1><span>BAPE JESUS</span><br>FANTASY FOOTBALL</h1>
-          <p class="hero-sub">12 teams. Superflex. 6-point passing TDs. First-down bonuses. Bad decisions immortalized forever.</p>
-          <div class="hero-actions">
-            <button class="btn primary" data-route="draft">Enter Draft Room</button>
-            <button class="btn ghost" data-route="scouting">Scout the Ops</button>
-          </div>
-          <div class="format-strip">
-            <span>12 TEAMS</span><span>SUPERFLEX</span><span>FULL PPR</span><span>6PT PASS TD</span><span>1PT 1ST DOWN</span>
-          </div>
-        </div>
-        <aside class="draft-clock-card holo-card">
-          <div class="micro">NEXT EVENT</div>
-          <div class="clock-title">2026 LIVE DRAFT</div>
-          <div class="countdown" id="countdown">--:--:--</div>
-          <div class="clock-date" id="draftDate">Loading draft time…</div>
-          <div class="your-picks">
-            <div><small>LEAGUE MODE</small><strong>SHARED</strong></div>
-            <div><small>DRAFT SIZE</small><strong>216 PICKS</strong></div>
-          </div>
-        </aside>
-      </div>
-
-      <div class="section-head">
-        <div><div class="kicker">THE ROOM</div><h2>Draft Order</h2></div>
-        <div class="order-actions"><button class="rail-btn" id="orderPrev" aria-label="Scroll draft order left">←</button><button class="rail-btn" id="orderNext" aria-label="Scroll draft order right">→</button><button class="text-btn" data-route="managers">Meet all 12 →</button></div>
-      </div>
-      <div class="draft-order-rail" id="draftOrderRail"></div>
-
-      <div class="dashboard-grid">
-        <article class="feature-card champion-card" id="championCard">
-          <div class="micro">DEFENDING CHAMPION</div>
-          <div class="feature-content"><div class="avatar-xl skeleton"></div><div><h3>Loading…</h3><p>2025 champion</p></div></div>
-          <div class="shine"></div>
-        </article>
-        <article class="stat-card">
-          <div class="micro">LEAGUE WAR ROOM</div>
-          <div class="big-stat" id="homeWarStat">1.01</div>
-          <p id="homeWarCopy">One shared board. Focus any team without changing what anyone else can see.</p>
-          <button class="text-btn" data-route="draft">Open board →</button>
-        </article>
-        <article class="stat-card">
-          <div class="micro">SCORING CHAOS</div>
-          <div class="big-stat">-3</div>
-          <p>Interceptions hurt. Pick-sixes can hurt again. QB efficiency matters more than normal.</p>
-        </article>
-      </div>
-
-      <div class="ticker-wrap" aria-label="league ticker">
-        <div class="ticker" id="ticker"></div>
-      </div>
+      <div class="hero-shell"><div class="hero-copy"><div class="eyebrow">2026 SEASON // YEAR OF THE SICKO</div><h1><span>BAPE JESUS</span><br>FANTASY FOOTBALL</h1><p class="hero-sub">12 teams. Superflex. 6-point passing TDs. First-down bonuses. Bad decisions immortalized forever.</p>
+        <div class="anthem-player" id="anthemPlayer"><button class="anthem-play" id="anthemPlay" aria-label="Play RIP Gyroball">▶</button><div class="anthem-info"><div class="anthem-label">BAPE JESUS RADIO // 2026 LEAGUE ANTHEM</div><div class="anthem-title">RIP GYROBALL</div><div class="anthem-track"><span class="anthem-time" id="anthemCurrent">0:00</span><input class="anthem-progress" id="anthemProgress" type="range" min="0" max="1" value="0" step="0.1" aria-label="Song progress"><span class="anthem-time" id="anthemDuration">1:19</span></div></div><label class="anthem-volume" aria-label="Volume">🔊 <input id="anthemVolume" type="range" min="0" max="1" value="0.8" step="0.05"></label><audio id="leagueAnthem" preload="metadata" src="./rip-gyroball-theme.mp3"></audio></div>
+        <div class="hero-actions"><button class="btn primary" data-route="draft">Enter Draft Room</button><button class="btn ghost" data-route="scouting">Scout the Ops</button></div><div class="format-strip"><span>12 TEAMS</span><span>SUPERFLEX</span><span>FULL PPR</span><span>6PT PASS TD</span><span>1PT 1ST DOWN</span></div></div>
+        <aside class="draft-clock-card holo-card"><div class="micro">NEXT EVENT</div><div class="clock-title">2026 LIVE DRAFT</div><div class="countdown" id="countdown">--:--:--</div><div class="clock-date" id="draftDate">Loading draft time…</div><div class="your-picks"><div><small>LEAGUE MODE</small><strong>SHARED</strong></div><div><small>DRAFT SIZE</small><strong>216 PICKS</strong></div></div></aside></div>
+      <div class="section-head"><div><div class="kicker">THE ROOM</div><h2>Draft Order</h2></div><div class="order-actions"><button class="rail-btn" id="orderPrev" aria-label="Scroll draft order left">←</button><button class="rail-btn" id="orderNext" aria-label="Scroll draft order right">→</button><button class="text-btn" data-route="managers">Meet all 12 →</button></div></div><div class="draft-order-rail" id="draftOrderRail"></div>
+      <div class="dashboard-grid"><article class="feature-card champion-card" id="championCard"><div class="micro">DEFENDING CHAMPION</div><div class="feature-content"><div class="avatar-xl skeleton"></div><div><h3>Loading…</h3><p>2025 champion</p></div></div><div class="shine"></div></article><article class="stat-card"><div class="micro">LEAGUE WAR ROOM</div><div class="big-stat" id="homeWarStat">1.01</div><p id="homeWarCopy">One shared board. Focus any team without changing what anyone else can see.</p><button class="text-btn" data-route="draft">Open board →</button></article><article class="stat-card"><div class="micro">SCORING CHAOS</div><div class="big-stat">-3</div><p>Interceptions hurt. Pick-sixes can hurt again. QB efficiency matters more than normal.</p></article></div><div class="ticker-wrap" aria-label="league ticker"><div class="ticker" id="ticker"></div></div>
     </section>
-
-    <section class="page" data-page="draft">
-      <div class="page-hero compact">
-        <div><div class="eyebrow">LIVE // SLEEPER SYNC</div><h1>LEAGUE WAR ROOM</h1><p>One shared live board for all 12 managers. Focus any team; nobody gets private information.</p></div>
-        <div class="sync-card"><span id="draftSyncDot"></span><div><small>STATUS</small><strong id="draftStatus">PRE-DRAFT</strong></div><button id="refreshDraft" class="icon-btn" title="Refresh draft">↻</button></div>
-      </div>
-
-      <div class="war-grid">
-        <aside class="on-deck holo-card">
-          <div class="micro">TEAM FOCUS // OPTIONAL</div>
-          <label class="focus-label" for="teamFocus">VIEW THE BOARD AS</label>
-          <select class="focus-select" id="teamFocus"><option value="">League View — all teams equal</option></select>
-          <h3 id="nextPickLabel">CURRENT: 1.01</h3>
-          <div class="focus-note" id="focusNote">Showing the next picks across the room.</div>
-          <div class="pick-sequence" id="pickSequence"></div>
-          <div class="neighbors">
-            <small id="trafficLabel">UP NEXT</small>
-            <div id="turnTraffic"></div>
-          </div>
-        </aside>
-        <div class="draft-board-shell">
-          <div class="board-toolbar">
-            <div><strong>2026 DRAFT BOARD</strong><small><span id="picksLogged">0 / 216 picks</span> · <span id="boardFocusLabel">LEAGUE VIEW</span></small></div>
-            <div class="legend"><span class="q qb"></span>QB <span class="q rb"></span>RB <span class="q wr"></span>WR <span class="q te"></span>TE</div>
-          </div>
-          <div class="draft-board" id="draftBoard"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="page" data-page="managers">
-      <div class="page-hero compact">
-        <div><div class="eyebrow">12 MEN ENTER // ONE GROUP CHAT SURVIVES</div><h1>THE LEAGUE</h1><p>Current teams, Sleeper identities, avatars, and 2026 draft seats.</p></div>
-      </div>
-      <div class="manager-grid" id="managerGrid"></div>
-    </section>
-
-    <section class="page" data-page="history">
-      <div class="page-hero compact">
-        <div><div class="eyebrow">RECEIPTS // FOREVER</div><h1>LEAGUE HISTORY</h1><p>Sleeper seasons are chained backward automatically. Records load straight from the league archive.</p></div>
-        <button class="btn ghost" id="loadHistory">Load / Refresh History</button>
-      </div>
-      <div class="history-loading hidden" id="historyLoading"><div class="spinner"></div><span>Digging through old group-chat crimes…</span></div>
-      <div id="historyContent">
-        <div class="empty-state"><div class="empty-icon">⌁</div><h3>History is ready to pull.</h3><p>Hit “Load / Refresh History” and this page will walk the Sleeper previous-league chain automatically.</p></div>
-      </div>
-    </section>
-
-    <section class="page" data-page="scouting">
-      <div class="page-hero compact">
-        <div><div class="eyebrow">KNOW THE ROOM</div><h1>SCOUTING REPORTS</h1><p>Prior draft behavior turned into tendencies for all 12 managers. Same intel, same access, no private view.</p></div>
-        <button class="btn ghost" id="loadScouting">Analyze Past Drafts</button>
-      </div>
-      <div class="spotlight" id="turnSpotlight"></div>
-      <div class="scout-grid" id="scoutGrid">
-        <div class="empty-state span-all"><div class="empty-icon">◎</div><h3>No tendencies loaded yet.</h3><p>Analyze past drafts to build manager scouting cards from Sleeper’s completed draft history.</p></div>
-      </div>
-    </section>
+    <section class="page" data-page="draft"><div class="page-hero compact"><div><div class="eyebrow">LIVE // SLEEPER SYNC</div><h1>LEAGUE WAR ROOM</h1><p>One shared live board for all 12 managers. Focus any team; nobody gets private information.</p></div><div class="sync-card"><span id="draftSyncDot"></span><div><small>STATUS</small><strong id="draftStatus">PRE-DRAFT</strong></div><button id="refreshDraft" class="icon-btn" title="Refresh draft">↻</button></div></div><div class="war-grid"><aside class="on-deck holo-card"><div class="micro">TEAM FOCUS // OPTIONAL</div><label class="focus-label" for="teamFocus">VIEW THE BOARD AS</label><select class="focus-select" id="teamFocus"><option value="">League View — all teams equal</option></select><h3 id="nextPickLabel">CURRENT: 1.01</h3><div class="focus-note" id="focusNote">Showing the next picks across the room.</div><div class="pick-sequence" id="pickSequence"></div><div class="neighbors"><small id="trafficLabel">UP NEXT</small><div id="turnTraffic"></div></div></aside><div class="draft-board-shell"><div class="board-toolbar"><div><strong>2026 DRAFT BOARD</strong><small><span id="picksLogged">0 / 216 picks</span> · <span id="boardFocusLabel">LEAGUE VIEW</span></small></div><div class="legend"><span class="q qb"></span>QB <span class="q rb"></span>RB <span class="q wr"></span>WR <span class="q te"></span>TE</div></div><div class="draft-board" id="draftBoard"></div></div></div></section>
+    <section class="page" data-page="managers"><div class="page-hero compact"><div><div class="eyebrow">12 MEN ENTER // ONE GROUP CHAT SURVIVES</div><h1>THE LEAGUE</h1><p>Current teams, Sleeper identities, avatars, and 2026 draft seats.</p></div></div><div class="manager-grid" id="managerGrid"></div></section>
+    <section class="page" data-page="history"><div class="page-hero compact"><div><div class="eyebrow">RECEIPTS // FOREVER</div><h1>LEAGUE HISTORY</h1><p>Sleeper seasons are chained backward automatically. Records load straight from the league archive.</p></div><button class="btn ghost" id="loadHistory">Load / Refresh History</button></div><div class="history-loading hidden" id="historyLoading"><div class="spinner"></div><span>Digging through old group-chat crimes…</span></div><div id="historyContent"><div class="empty-state"><div class="empty-icon">⌁</div><h3>History is ready to pull.</h3><p>Hit “Load / Refresh History” and this page will walk the Sleeper previous-league chain automatically.</p></div></div></section>
+    <section class="page" data-page="scouting"><div class="page-hero compact"><div><div class="eyebrow">KNOW THE ROOM</div><h1>SCOUTING REPORTS</h1><p>Prior draft behavior turned into tendencies for all 12 managers. Same intel, same access, no private view.</p></div><button class="btn ghost" id="loadScouting">Analyze Past Drafts</button></div><div class="spotlight" id="turnSpotlight"></div><div class="scout-grid" id="scoutGrid"><div class="empty-state span-all"><div class="empty-icon">◎</div><h3>No tendencies loaded yet.</h3><p>Analyze past drafts to build manager scouting cards from Sleeper’s completed draft history.</p></div></div></section>
   </main>
-
-  <footer>
-    <div><strong>BAPE JESUS FANTASY FOOTBALL</strong><span>Unofficial league companion.</span></div>
-    <div>Data via Sleeper public API · Built for chaos, not affiliated with Sleeper.</div>
-  </footer>
-
-  <script src="./app-core.js"></script>
-  <script src="./app-draft.js"></script>
-  <script src="./app-history.js"></script>
-  <script src="./app-live.js"></script>
-  <script src="./app-boot.js"></script>
-</body>
-</html>
+  <footer><div><strong>BAPE JESUS FANTASY FOOTBALL</strong><span>Unofficial league companion.</span></div><div>Data via Sleeper public API · Built for chaos, not affiliated with Sleeper.</div></footer>
+  <script src="./app-core.js"></script><script src="./app-draft.js"></script><script src="./app-history.js"></script><script src="./app-live.js"></script><script src="./app-boot.js"></script><script src="./anthem.js"></script>
+</body></html>
