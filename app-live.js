@@ -104,7 +104,7 @@ function renderLiveCommandBar(){
       avatar.alt=currentManager ? `${currentManager.team} avatar` : '';
     }
     if(team) team.textContent=currentManager?.team || `Slot ${current.slot}`;
-    if(pick) pick.textContent=`Pick ${current.round}.${String(current.slot).padStart(2,'0')} · #${current.overall}`;
+    if(pick) pick.textContent=`Pick ${draftPickLabel(current)} · #${current.overall}`;
   }
 
   const picks = sortedLivePicks();
