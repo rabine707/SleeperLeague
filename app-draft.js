@@ -8,6 +8,8 @@ function makePickOrder(rounds=CONFIG.rounds, teams=CONFIG.teams){
   return out;
 }
 const fullOrder=makePickOrder();
+function roundPickNumber(seq){ return seq ? ((Number(seq.overall)-1)%CONFIG.teams)+1 : 0; }
+function draftPickLabel(seq){ return seq ? `${seq.round}.${String(roundPickNumber(seq)).padStart(2,'0')}` : '—'; }
 
 function pickForCell(round,slot){ return currentPicks.find(p=>Number(p.round)===round && Number(p.draft_slot)===slot); }
 function playerName(p){ return p?.metadata?.first_name ? `${p.metadata.first_name} ${p.metadata.last_name||''}`.trim() : (p?.metadata?.player_name || p?.player_id || 'Unknown'); }
@@ -28,7 +30,7 @@ function renderDraftBoard(){
       const seq=fullOrder.find(x=>x.round===r&&x.slot===slot);
       const isClock=seq?.overall===nextOverall && currentDraft?.status!=='complete';
       cells+=`<div class="board-cell ${slot===focusSlot?'focus-col':''} ${isClock?'on-clock':''}" data-focus-slot="${slot}">
-        ${p?`<div class="pick-card ${posClass(pickPos(p))}"><div class="pick-no">${r}.${String(slot).padStart(2,'0')} · #${p.pick_no||seq.overall}</div><div class="player">${esc(playerName(p))}</div><div class="meta">${esc(pickPos(p)||'—')} · ${esc(p.metadata?.team||'FA')}</div></div>`:`<span class="empty-pick">${r}.${String(slot).padStart(2,'0')}</span>`}
+        ${p?`<div class="pick-card ${posClass(pickPos(p))}"><div class="pick-no">${draftPickLabel(seq)} · #${p.pick_no||seq.overall}</div><div class="player">${esc(playerName(p))}</div><div class="meta">${esc(pickPos(p)||'—')} · ${esc(p.metadata?.team||'FA')}</div></div>`:`<span class="empty-pick">${draftPickLabel(seq)}</span>`}
       </div>`;
     }
   }
@@ -62,11 +64,11 @@ function updateWarRoom(){
     $('#boardFocusLabel').textContent='LEAGUE VIEW';
     $('#focusNote').textContent='Showing the next picks across the room. Choose any team only as a visual focus.';
     $('#trafficLabel').textContent='UP NEXT';
-    $('#nextPickLabel').textContent=current?`CURRENT: ${current.round}.${String(current.slot).padStart(2,'0')} · #${current.overall}`:'DRAFT COMPLETE';
+    $('#nextPickLabel').textContent=current?`CURRENT: ${draftPickLabel(current)} · #${current.overall}`:'DRAFT COMPLETE';
     const upcoming=fullOrder.filter(p=>p.overall>=nextOverall).slice(0,5);
     $('#pickSequence').innerHTML=upcoming.map((p,i)=>`<div class="seq-pick ${i===0?'current':''}"><span>${p.round}.${String(p.slot).padStart(2,'0')} · ${esc(managers.find(m=>m.slot===p.slot)?.team||`Slot ${p.slot}`)}</span><b>#${p.overall}</b></div>`).join('');
     $('#turnTraffic').innerHTML=upcoming.slice(0,4).map(p=>{const m=managers.find(x=>x.slot===p.slot);return m?`<div class="traffic-item"><img src="${esc(m.avatar)}" alt=""><span><b>#${p.overall} · ${esc(m.team)}</b><br>@${esc(m.display_name)}</span></div>`:''}).join('');
-    $('#homeWarStat').textContent=current?`${current.round}.${String(current.slot).padStart(2,'0')}`:'DONE';
+    $('#homeWarStat').textContent=current?`${draftPickLabel(current)}`:'DONE';
     $('#homeWarCopy').textContent=current?`${managers.find(m=>m.slot===current.slot)?.team||'The room'} is next on the shared board. Everyone sees the same live state.`:'The 2026 draft is complete. The shared board remains the league receipt.';
     return;
   }
@@ -76,7 +78,7 @@ function updateWarRoom(){
   $('#boardFocusLabel').textContent=`FOCUS: #${focusSlot} ${focused?.team||''}`.trim();
   $('#focusNote').textContent=`Visual focus only — every manager can select any team and sees the exact same league data.`;
   $('#trafficLabel').textContent='BEFORE THIS TEAM PICKS';
-  $('#nextPickLabel').textContent=next?`NEXT: ${next.round}.${String(next.slot).padStart(2,'0')} · #${next.overall}`:'TEAM DRAFT COMPLETE';
+  $('#nextPickLabel').textContent=next?`NEXT: ${draftPickLabel(next)} · #${next.overall}`:'TEAM DRAFT COMPLETE';
   const idx=teamPicks.findIndex(p=>p.overall===next?.overall);
   const seq=next?teamPicks.slice(Math.max(0,idx),Math.max(0,idx)+5):teamPicks.slice(-5);
   $('#pickSequence').innerHTML=seq.map((p,i)=>`<div class="seq-pick ${i===0&&next?'current':''}"><span>Round ${p.round}</span><b>#${p.overall}</b></div>`).join('');
