@@ -8,10 +8,9 @@
   const showGate=()=>{clearTimeout(collapseTimer);gate.classList.remove('dismissed');requestAnimationFrame(()=>gate.classList.remove('collapsing'));mini.classList.remove('visible');reopen?.classList.remove('visible');document.body.classList.remove('anthem-active');window.scrollTo({top:0,behavior:'smooth'})};
   const closePlayer=()=>{audio.pause();mini.classList.remove('visible');document.body.classList.remove('anthem-active');reopen?.classList.add('visible')};
   const reopenPlayer=()=>{mini.classList.add('visible');reopen?.classList.remove('visible');document.body.classList.add('anthem-active')};
-  // Showcase route always starts at the full intro. Do not share the normal site's session state.
   gate.classList.remove('dismissed','collapsing');mini.classList.remove('visible');reopen?.classList.remove('visible');document.body.classList.remove('anthem-active');
   audio.volume=.8;progress.value='0';if(miniProgress)miniProgress.value='0';if(volume)volume.value=audio.volume;
-  play.addEventListener('click',async()=>{if(audio.paused){try{await audio.play();collapseTimer=window.setTimeout(showMini,2600)}catch(err){console.warn('Mixtape audio playback blocked',err)}}else audio.pause()});
+  play.addEventListener('click',async()=>{if(audio.paused){try{await audio.play();collapseTimer=window.setTimeout(showMini,30000)}catch(err){console.warn('Mixtape audio playback blocked',err)}}else audio.pause()});
   miniPlay?.addEventListener('click',async()=>{if(audio.paused){try{await audio.play()}catch(err){console.warn('Mixtape audio playback blocked',err)}}else audio.pause()});expand?.addEventListener('click',showGate);close?.addEventListener('click',closePlayer);reopen?.addEventListener('click',reopenPlayer);
   audio.addEventListener('play',()=>{play.classList.add('playing');if(icon)icon.textContent='Ⅱ';if(copy)copy.innerHTML='<small>NOW PLAYING // 2026 LEAGUE ANTHEM</small>RIP GYROBALL';if(miniPlay)miniPlay.textContent='Ⅱ';play.setAttribute('aria-label','Pause RIP Gyroball')});
   audio.addEventListener('pause',()=>{clearTimeout(collapseTimer);play.classList.remove('playing');if(icon)icon.textContent='▶';if(copy)copy.innerHTML='<small>2026 LEAGUE ANTHEM</small>PLAY THIS BEFORE ENTERING';if(miniPlay)miniPlay.textContent='▶';play.setAttribute('aria-label','Play RIP Gyroball')});
