@@ -29,28 +29,39 @@
     if(!scored.length)return null;
     return scored.reduce((worst,id)=>points(row,id)<points(row,worst)?id:worst,scored[0]);
   }
-  function slotLabel(slot){
-    return slot==='SUPER_FLEX'?'SUPER<br>FLEX':esc(slot);
-  }
+  function slotLabel(slot){return slot==='SUPER_FLEX'?'SUPER<br>FLEX':esc(slot)}
   function playerRow(item,row,players,mvp,lvp){
     const p=players[item.id]||{}, pts=points(row,item.id), isMvp=String(item.id)===String(mvp)&&pts>0, isLvp=String(item.id)===String(lvp)&&pts>0;
     const cls=['md-player',pts===0?'md-zero':'',pts>=25?'md-hot':'',isMvp?'md-mvp':'',isLvp?'md-lvp':''].filter(Boolean).join(' ');
     return '<div class="'+cls+'"><span class="md-slot">'+slotLabel(item.slot)+'</span><img class="md-player-img" src="'+playerImg(item.id)+'" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'"><div class="md-player-copy"><strong>'+esc(playerName(p,item.id))+(isMvp?'<em class="md-mvp-badge">MVP</em>':'')+(isLvp?'<em class="md-lvp-badge">LVP</em>':'')+'</strong><small>'+esc(playerMeta(p))+'</small></div><b class="md-points">'+pts.toFixed(2)+'</b></div>';
   }
+  function managerIdentity(m,side){
+    return '<div class="md-manager '+side+'"><img src="'+esc(m.avatar)+'" alt="" onerror="this.style.visibility=\'hidden\'"><div><strong>'+esc(m.handle)+'</strong><small>'+esc(m.team)+'</small></div></div>';
+  }
   function teamPanel(row,players,leading){
     const m=wManagerId(row.roster_id), l=lineup(row), mvp=mvpId(row), lvp=lvpId(row,mvp);
-    return '<section class="md-team '+(leading?'md-leading':'')+'"><header><div><small>'+esc(m.handle)+'</small><h3>'+esc(m.team)+'</h3></div><div class="md-team-score">'+(leading?'<span>LEADING</span>':'')+'<strong>'+Number(row.points||0).toFixed(2)+'</strong></div></header><div class="md-lineup">'+l.start.map(x=>playerRow(x,row,players,mvp,lvp)).join('')+'</div>'+(l.bench.length?'<details class="md-bench"><summary>BENCH <span>'+l.bench.length+' PLAYERS</span></summary>'+l.bench.map(x=>playerRow(x,row,players,null,null)).join('')+'</details>':'')+'</section>';
+    return '<section class="md-team '+(leading?'md-leading':'')+'"><header>'+managerIdentity(m,'panel')+'<div class="md-team-score">'+(leading?'<span>LEADING</span>':'')+'<strong>'+Number(row.points||0).toFixed(2)+'</strong></div></header><div class="md-lineup">'+l.start.map(x=>playerRow(x,row,players,mvp,lvp)).join('')+'</div>'+(l.bench.length?'<details class="md-bench"><summary>BENCH <span>'+l.bench.length+' PLAYERS</span></summary>'+l.bench.map(x=>playerRow(x,row,players,null,null)).join('')+'</details>':'')+'</section>';
+  }
+  function mobilePlayer(item,row,players,mvp,lvp,side){
+    const p=players[item.id]||{},pts=points(row,item.id),isMvp=String(item.id)===String(mvp)&&pts>0,isLvp=String(item.id)===String(lvp)&&pts>0;
+    const cls=['md-h2h-player',side,isMvp?'md-mvp':'',isLvp?'md-lvp':'',pts===0?'md-zero':''].filter(Boolean).join(' ');
+    const badge=isMvp?'<em class="md-mvp-badge">MVP</em>':isLvp?'<em class="md-lvp-badge">LVP</em>':'';
+    return '<div class="'+cls+'"><img src="'+playerImg(item.id)+'" alt="" onerror="this.style.visibility=\'hidden\'"><div class="md-h2h-copy"><strong>'+esc(playerName(p,item.id))+badge+'</strong><small>'+esc(playerMeta(p))+'</small></div><b>'+pts.toFixed(2)+'</b></div>';
+  }
+  function mobileHeadToHead(a,b,players){
+    const am=wManagerId(a.roster_id),bm=wManagerId(b.roster_id),al=lineup(a),bl=lineup(b),amvp=mvpId(a),bmvp=mvpId(b),alvp=lvpId(a,amvp),blvp=lvpId(b,bmvp),len=Math.max(al.start.length,bl.start.length);
+    let rows='';
+    for(let i=0;i<len;i++){
+      const ai=al.start[i],bi=bl.start[i],slot=ai?.slot||bi?.slot||'START';
+      rows+='<div class="md-h2h-row">'+(ai?mobilePlayer(ai,a,players,amvp,alvp,'left'):'<div></div>')+'<span class="md-h2h-slot">'+slotLabel(slot)+'</span>'+(bi?mobilePlayer(bi,b,players,bmvp,blvp,'right'):'<div></div>')+'</div>';
+    }
+    return '<div class="md-mobile-h2h"><div class="md-mobile-managers">'+managerIdentity(am,'left')+'<span class="md-manager-vs">VS</span>'+managerIdentity(bm,'right')+'</div><div class="md-mobile-totals"><strong>'+Number(a.points||0).toFixed(2)+'</strong><span>MATCHUP</span><strong>'+Number(b.points||0).toFixed(2)+'</strong></div><div class="md-h2h-list">'+rows+'</div></div>';
   }
   function matchupState(a,b){
     const ap=Number(a?.points||0),bp=Number(b?.points||0),diff=Math.abs(ap-bp),current=wWeek(weeklyHQ.nfl?.week||1);
     const status=weeklyHQ.selected<current?'FINAL':weeklyHQ.selected===current&&(ap||bp)?'LIVE':'UPCOMING';
     let label=status;
-    if(ap||bp){
-      if(diff>=100)label='CRIME SCENE';
-      else if(diff>=60)label='BODY BAG';
-      else if(diff>=35)label='GETTING UGLY';
-      else if(diff<=5)label='PHOTO FINISH';
-    }
+    if(ap||bp){if(diff>=100)label='CRIME SCENE';else if(diff>=60)label='BODY BAG';else if(diff>=35)label='GETTING UGLY';else if(diff<=5)label='PHOTO FINISH'}
     return {ap,bp,diff,status,label};
   }
   function scoreHero(a,b){
@@ -62,33 +73,14 @@
     document.body.insertAdjacentHTML('beforeend','<div class="md-modal" id="matchupDetailModal" hidden><button class="md-backdrop" aria-label="Close matchup"></button><div class="md-dialog" role="dialog" aria-modal="true" aria-labelledby="mdTitle"><div class="md-head"><div><small id="mdKicker">MATCHUP</small><h2 id="mdTitle">GAME DETAILS</h2></div><button class="md-close" type="button" aria-label="Close">×</button></div><div class="md-body" id="mdBody"></div></div></div>');
     const modal=document.querySelector('#matchupDetailModal');
     const close=()=>{modal.hidden=true;document.body.classList.remove('md-open')};
-    modal.querySelector('.md-close').addEventListener('click',close);
-    modal.querySelector('.md-backdrop').addEventListener('click',close);
-    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
+    modal.querySelector('.md-close').addEventListener('click',close);modal.querySelector('.md-backdrop').addEventListener('click',close);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
   }
   async function openMatchup(id){
-    ensureModal();
-    const modal=document.querySelector('#matchupDetailModal'), body=document.querySelector('#mdBody');
-    modal.hidden=false;document.body.classList.add('md-open');
-    document.querySelector('#mdKicker').textContent='WEEK '+weeklyHQ.selected+' // GAME '+id;
-    body.innerHTML='<div class="md-loading">Loading lineups…</div>';
-    const rows=weeklyHQ.weeks.get(weeklyHQ.selected)||[], group=wGroups(rows).find(g=>String(g.id)===String(id));
-    if(!group||group.teams.length<2){body.innerHTML='<div class="md-loading">Matchup data is not available yet.</div>';return}
+    ensureModal();const modal=document.querySelector('#matchupDetailModal'),body=document.querySelector('#mdBody');modal.hidden=false;document.body.classList.add('md-open');document.querySelector('#mdKicker').textContent='WEEK '+weeklyHQ.selected+' // GAME '+id;body.innerHTML='<div class="md-loading">Loading lineups…</div>';
+    const rows=weeklyHQ.weeks.get(weeklyHQ.selected)||[],group=wGroups(rows).find(g=>String(g.id)===String(id));if(!group||group.teams.length<2){body.innerHTML='<div class="md-loading">Matchup data is not available yet.</div>';return}
     const players=await loadPlayers(),a=group.teams[0],b=group.teams[1],ap=Number(a.points||0),bp=Number(b.points||0);
-    body.innerHTML=scoreHero(a,b)+'<div class="md-grid">'+teamPanel(a,players,ap>bp)+'<div class="md-vs">VS</div>'+teamPanel(b,players,bp>ap)+'</div>';
+    body.innerHTML=scoreHero(a,b)+'<div class="md-desktop-matchup"><div class="md-grid">'+teamPanel(a,players,ap>bp)+'<div class="md-vs">VS</div>'+teamPanel(b,players,bp>ap)+'</div></div>'+mobileHeadToHead(a,b,players);
   }
-  function wireCards(){
-    document.querySelectorAll('#weeklyMatchups .matchup-card').forEach(card=>{
-      if(card.dataset.mdReady)return;
-      const id=card.querySelector('.matchup-top span')?.textContent?.replace(/^GAME\s+/,'');
-      if(!id)return;
-      card.dataset.mdReady='1';card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label','Open matchup '+id+' player scores');
-      card.insertAdjacentHTML('beforeend','<div class="md-open-hint">VIEW LINEUPS →</div>');
-      card.addEventListener('click',()=>openMatchup(id));
-      card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openMatchup(id)}});
-    });
-  }
-  const obs=new MutationObserver(wireCards);
-  function init(){ensureModal();wireCards();const root=document.querySelector('#weeklyMatchups');if(root)obs.observe(root,{childList:true,subtree:true})}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+  function wireCards(){document.querySelectorAll('#weeklyMatchups .matchup-card').forEach(card=>{if(card.dataset.mdReady)return;const id=card.querySelector('.matchup-top span')?.textContent?.replace(/^GAME\s+/,'');if(!id)return;card.dataset.mdReady='1';card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label','Open matchup '+id+' player scores');card.insertAdjacentHTML('beforeend','<div class="md-open-hint">VIEW LINEUPS →</div>');card.addEventListener('click',()=>openMatchup(id));card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openMatchup(id)}})})}
+  const obs=new MutationObserver(wireCards);function init(){ensureModal();wireCards();const root=document.querySelector('#weeklyMatchups');if(root)obs.observe(root,{childList:true,subtree:true})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
