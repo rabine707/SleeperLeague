@@ -24,10 +24,13 @@
     if(!starters.length)return null;
     return starters.reduce((best,id)=>points(row,id)>points(row,best)?id:best,starters[0]);
   }
+  function slotLabel(slot){
+    return slot==='SUPER_FLEX'?'SUPER<br>FLEX':esc(slot);
+  }
   function playerRow(item,row,players,mvp){
     const p=players[item.id]||{}, pts=points(row,item.id), isMvp=String(item.id)===String(mvp)&&pts>0;
     const cls=['md-player',pts===0?'md-zero':'',pts>=25?'md-hot':'',isMvp?'md-mvp':''].filter(Boolean).join(' ');
-    return '<div class="'+cls+'"><span class="md-slot">'+esc(item.slot)+'</span><img class="md-player-img" src="'+playerImg(item.id)+'" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'"><div class="md-player-copy"><strong>'+esc(playerName(p,item.id))+(isMvp?'<em class="md-mvp-badge">MVP</em>':'')+'</strong><small>'+esc(playerMeta(p))+'</small></div><b class="md-points">'+pts.toFixed(2)+'</b></div>';
+    return '<div class="'+cls+'"><span class="md-slot">'+slotLabel(item.slot)+'</span><img class="md-player-img" src="'+playerImg(item.id)+'" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'"><div class="md-player-copy"><strong>'+esc(playerName(p,item.id))+(isMvp?'<em class="md-mvp-badge">MVP</em>':'')+'</strong><small>'+esc(playerMeta(p))+'</small></div><b class="md-points">'+pts.toFixed(2)+'</b></div>';
   }
   function teamPanel(row,players,leading){
     const m=wManagerId(row.roster_id), l=lineup(row), mvp=mvpId(row);
