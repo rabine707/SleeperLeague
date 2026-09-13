@@ -24,17 +24,22 @@
     if(!starters.length)return null;
     return starters.reduce((best,id)=>points(row,id)>points(row,best)?id:best,starters[0]);
   }
+  function lvpId(row,mvp){
+    const scored=(row?.starters||[]).filter(id=>points(row,id)>0&&String(id)!==String(mvp));
+    if(!scored.length)return null;
+    return scored.reduce((worst,id)=>points(row,id)<points(row,worst)?id:worst,scored[0]);
+  }
   function slotLabel(slot){
     return slot==='SUPER_FLEX'?'SUPER<br>FLEX':esc(slot);
   }
-  function playerRow(item,row,players,mvp){
-    const p=players[item.id]||{}, pts=points(row,item.id), isMvp=String(item.id)===String(mvp)&&pts>0;
-    const cls=['md-player',pts===0?'md-zero':'',pts>=25?'md-hot':'',isMvp?'md-mvp':''].filter(Boolean).join(' ');
-    return '<div class="'+cls+'"><span class="md-slot">'+slotLabel(item.slot)+'</span><img class="md-player-img" src="'+playerImg(item.id)+'" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'"><div class="md-player-copy"><strong>'+esc(playerName(p,item.id))+(isMvp?'<em class="md-mvp-badge">MVP</em>':'')+'</strong><small>'+esc(playerMeta(p))+'</small></div><b class="md-points">'+pts.toFixed(2)+'</b></div>';
+  function playerRow(item,row,players,mvp,lvp){
+    const p=players[item.id]||{}, pts=points(row,item.id), isMvp=String(item.id)===String(mvp)&&pts>0, isLvp=String(item.id)===String(lvp)&&pts>0;
+    const cls=['md-player',pts===0?'md-zero':'',pts>=25?'md-hot':'',isMvp?'md-mvp':'',isLvp?'md-lvp':''].filter(Boolean).join(' ');
+    return '<div class="'+cls+'"><span class="md-slot">'+slotLabel(item.slot)+'</span><img class="md-player-img" src="'+playerImg(item.id)+'" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'"><div class="md-player-copy"><strong>'+esc(playerName(p,item.id))+(isMvp?'<em class="md-mvp-badge">MVP</em>':'')+(isLvp?'<em class="md-lvp-badge">LVP</em>':'')+'</strong><small>'+esc(playerMeta(p))+'</small></div><b class="md-points">'+pts.toFixed(2)+'</b></div>';
   }
   function teamPanel(row,players,leading){
-    const m=wManagerId(row.roster_id), l=lineup(row), mvp=mvpId(row);
-    return '<section class="md-team '+(leading?'md-leading':'')+'"><header><div><small>'+esc(m.handle)+'</small><h3>'+esc(m.team)+'</h3></div><div class="md-team-score">'+(leading?'<span>LEADING</span>':'')+'<strong>'+Number(row.points||0).toFixed(2)+'</strong></div></header><div class="md-lineup">'+l.start.map(x=>playerRow(x,row,players,mvp)).join('')+'</div>'+(l.bench.length?'<details class="md-bench"><summary>BENCH <span>'+l.bench.length+' PLAYERS</span></summary>'+l.bench.map(x=>playerRow(x,row,players,null)).join('')+'</details>':'')+'</section>';
+    const m=wManagerId(row.roster_id), l=lineup(row), mvp=mvpId(row), lvp=lvpId(row,mvp);
+    return '<section class="md-team '+(leading?'md-leading':'')+'"><header><div><small>'+esc(m.handle)+'</small><h3>'+esc(m.team)+'</h3></div><div class="md-team-score">'+(leading?'<span>LEADING</span>':'')+'<strong>'+Number(row.points||0).toFixed(2)+'</strong></div></header><div class="md-lineup">'+l.start.map(x=>playerRow(x,row,players,mvp,lvp)).join('')+'</div>'+(l.bench.length?'<details class="md-bench"><summary>BENCH <span>'+l.bench.length+' PLAYERS</span></summary>'+l.bench.map(x=>playerRow(x,row,players,null,null)).join('')+'</details>':'')+'</section>';
   }
   function matchupState(a,b){
     const ap=Number(a?.points||0),bp=Number(b?.points||0),diff=Math.abs(ap-bp),current=wWeek(weeklyHQ.nfl?.week||1);
