@@ -68,8 +68,8 @@ function updateWarRoom(){
     const upcoming=fullOrder.filter(p=>p.overall>=nextOverall).slice(0,5);
     $('#pickSequence').innerHTML=upcoming.map((p,i)=>`<div class="seq-pick ${i===0?'current':''}"><span>${p.round}.${String(p.slot).padStart(2,'0')} · ${esc(managers.find(m=>m.slot===p.slot)?.team||`Slot ${p.slot}`)}</span><b>#${p.overall}</b></div>`).join('');
     $('#turnTraffic').innerHTML=upcoming.slice(0,4).map(p=>{const m=managers.find(x=>x.slot===p.slot);return m?`<div class="traffic-item"><img src="${esc(m.avatar)}" alt=""><span><b>#${p.overall} · ${esc(m.team)}</b><br>@${esc(m.display_name)}</span></div>`:''}).join('');
-    $('#homeWarStat').textContent=current?`${draftPickLabel(current)}`:'DONE';
-    $('#homeWarCopy').textContent=current?`${managers.find(m=>m.slot===current.slot)?.team||'The room'} is next on the shared board. Everyone sees the same live state.`:'The 2026 draft is complete. The shared board remains the league receipt.';
+    if($('#homeWarStat'))$('#homeWarStat').textContent=current?`${draftPickLabel(current)}`:'DONE';
+    if($('#homeWarCopy'))$('#homeWarCopy').textContent=current?`${managers.find(m=>m.slot===current.slot)?.team||'The room'} is next on the shared board. Everyone sees the same live state.`:'The 2026 draft is complete. The shared board remains the league receipt.';
     return;
   }
 

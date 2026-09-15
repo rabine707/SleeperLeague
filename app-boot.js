@@ -19,6 +19,7 @@ function homeSeasonStyles(){
   `;document.head.appendChild(s);
 }
 function homeTeam(row){
+  if(!row)return '<div class="home-team">Bye / opponent pending</div>';
   const r=wRoster(row?.roster_id),m=wManager(r);return `<div class="home-team"><img src="${esc(m.avatar)}" alt=""><div><strong>${esc(m.team)}</strong><span>${esc(wRecText(r))}</span></div><em>${Number(row?.points||0).toFixed(1)}</em></div>`;
 }
 function homeHeadline(rows,current){
@@ -30,21 +31,7 @@ function homeHeadline(rows,current){
   if(close&&close.d<8){const [a,b]=close.g.teams;return `${wManagerId(a.roster_id).team} vs ${wManagerId(b.roster_id).team} is the group-chat heart rate game: ${close.d.toFixed(1)} points apart.`}
   return `${wManagerId(high.roster_id).team} is currently holding the Week ${current} high-score belt at ${Number(high.points||0).toFixed(1)}.`;
 }
-async function renderHomeSeason(){
-  const hero=$('#leagueHome');if(!hero||typeof wBasics!=='function')return;
-  homeSeasonStyles();
-  let section=$('#homeWeek');if(!section){section=document.createElement('section');section.id='homeWeek';section.className='home-week';hero.insertAdjacentElement('afterend',section)}
-  section.innerHTML='<div class="home-loading">Syncing this week from Sleeper…</div>';
-  try{
-    await wBasics(false);const current=wWeek(weeklyHQ.nfl?.week||1),rows=await wLoadWeek(current,false),groups=wGroups(rows),history=await wHistory(),power=wPower(history);
-    document.querySelectorAll('.nav button[data-route="weekly"]').forEach(b=>b.textContent='Week '+current);
-    const scored=(rows||[]).some(r=>Number(r.points||0)>0),final=current<wWeek(weeklyHQ.nfl?.week||1),state=final?'FINAL':scored?'LIVE':'UPCOMING';
-    let featured=-1,best=Infinity;groups.forEach((g,i)=>{if(g.teams.length<2)return;const d=Math.abs(Number(g.teams[0].points||0)-Number(g.teams[1].points||0));if(scored&&d<best){best=d;featured=i}});if(featured<0)featured=0;
-    section.innerHTML=`<div class="home-week-head"><div><div class="kicker">THE SLATE // WEEK ${current}</div><h2>This Week</h2></div><button class="text-btn" data-route="weekly">Full Week ${current} HQ →</button></div><div class="home-matchups">${groups.map((g,i)=>`<article class="home-game ${i===featured?'featured':''}"><div class="home-game-top"><span>${i===featured?'★ GAME OF THE WEEK':'MATCHUP '+g.id}</span><b>${state}</b></div>${homeTeam(g.teams[0])}<div class="home-vs"></div>${homeTeam(g.teams[1])}</article>`).join('')}</div>`;
-    let pulse=$('#homePulse');if(!pulse){pulse=document.createElement('div');pulse.id='homePulse';pulse.className='home-pulse-grid';section.insertAdjacentElement('afterend',pulse)}
-    const n=wCompleted(),top=power[0],bottom=power.at(-1);pulse.innerHTML=`<article class="home-pulse"><div class="micro">LEAGUE PULSE</div><h3>${esc(homeHeadline(rows,current))}</h3><p>Built from the live Sleeper scoreboard. The receipts update with the week.</p></article><article class="home-pulse"><div class="micro">POWER WATCH</div><div class="home-move">${n?'#1':'—'}</div><h3>${esc(n&&top?top.m.team:'After Week 1')}</h3><p>${n?'Current power-board leader.':'Power movement activates after games are in the books.'}</p></article><article class="home-pulse"><div class="micro">PRESSURE CHECK</div><div class="home-move">${n?'#12':'0-0'}</div><h3>${esc(n&&bottom?bottom.m.team:'Clean slate')}</h3><p>${n?'Somebody has to live down here.':'Nobody has earned a roast yet.'}</p></article>`;
-  }catch(e){section.innerHTML='<div class="home-loading">Sleeper did not answer. League HQ can still be opened manually.</div>'}
-}
+async function renderHomeSeason(){ await renderWeeklyHQ(); }
 
 async function boot(){
   renderManagers(); renderOrder(); buildTicker(); populateFocusSelect(); renderDraftBoard(); updateCountdown(); renderChampion();
@@ -53,3 +40,5 @@ async function boot(){
   renderHomeSeason();
 }
 boot();
+setInterval(()=>{if(!document.hidden)renderWeeklyHQ(true)},60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)renderWeeklyHQ(true)});

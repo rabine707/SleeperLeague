@@ -75,6 +75,7 @@ function renderManagers(){
 }
 
 function renderOrder(){
+  if(!$('#draftOrderRail'))return;
   $('#draftOrderRail').innerHTML = [...managers].sort((a,b)=>a.slot-b.slot).map(m=>`
     <article class="order-card" data-focus-slot="${m.slot}" title="Focus ${esc(m.team)} on the draft board">
       <div class="order-num">${String(m.slot).padStart(2,'0')}</div>
@@ -94,6 +95,7 @@ function buildTicker(){
 }
 
 function updateCountdown(){
+  if(!$('#draftDate')||!$('#countdown'))return;
   const now=Date.now(), diff=CONFIG.draftStart-now;
   const d=new Date(CONFIG.draftStart);
   $('#draftDate').textContent=d.toLocaleString([], {weekday:'long',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});

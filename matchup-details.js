@@ -1,16 +1,16 @@
 // Clickable Sleeper matchup detail overlay.
 // Uses the player-level points already returned on each Sleeper matchup row.
 (function(){
-  const state={players:null,loading:null};
+  const state={players:null,loading:null,week:1,request:0,opener:null,id:null};
   const slotNames=()=>weeklyHQ?.league?.roster_positions||[];
   async function loadPlayers(){
     if(state.players)return state.players;
-    if(!state.loading)state.loading=api('/players/nfl').then(x=>state.players=x||{}).catch(()=>state.players={});
+    if(!state.loading)state.loading=api('/players/nfl').then(x=>state.players=x||{}).catch(()=>{state.loading=null;return {}});
     return state.loading;
   }
   function points(row,id){return Number(row?.players_points?.[id]??0)}
   function playerName(p,id){return p?.full_name||[p?.first_name,p?.last_name].filter(Boolean).join(' ')||('Player '+id)}
-  function playerMeta(p){return [p?.position,p?.team].filter(Boolean).join(' · ')||'NFL'}
+  function playerMeta(p){return [p?.position,p?.team,seasonPlayerMeta(p,state.week),p?.injury_status].filter(Boolean).join(' · ')}
   function playerImg(id){return 'https://sleepercdn.com/content/nfl/players/'+encodeURIComponent(id)+'.jpg'}
   function lineup(row){
     const starters=row?.starters||[], all=row?.players||[], positions=slotNames();
@@ -58,9 +58,9 @@
     return '<div class="md-mobile-h2h"><div class="md-mobile-managers">'+managerIdentity(am,'left')+'<span class="md-manager-vs">VS</span>'+managerIdentity(bm,'right')+'</div><div class="md-mobile-totals"><strong>'+Number(a.points||0).toFixed(2)+'</strong><span>MATCHUP</span><strong>'+Number(b.points||0).toFixed(2)+'</strong></div><div class="md-h2h-list">'+rows+'</div></div>';
   }
   function matchupState(a,b){
-    const ap=Number(a?.points||0),bp=Number(b?.points||0),diff=Math.abs(ap-bp),current=wWeek(weeklyHQ.nfl?.week||1);
-    const status=weeklyHQ.selected<current?'FINAL':weeklyHQ.selected===current&&(ap||bp)?'LIVE':'UPCOMING';
-    let label=status;
+    const ap=Number(a?.points||0),bp=Number(b?.points||0),diff=Math.abs(ap-bp),current=season.current;
+    const status=seasonMode(state.week);
+    let label=status==='PREP'?'SET YOUR LINEUP':status;
     if(ap||bp){if(diff>=100)label='CRIME SCENE';else if(diff>=60)label='BODY BAG';else if(diff>=35)label='GETTING UGLY';else if(diff<=5)label='PHOTO FINISH'}
     return {ap,bp,diff,status,label};
   }
@@ -72,15 +72,19 @@
     if(document.querySelector('#matchupDetailModal'))return;
     document.body.insertAdjacentHTML('beforeend','<div class="md-modal" id="matchupDetailModal" hidden><button class="md-backdrop" aria-label="Close matchup"></button><div class="md-dialog" role="dialog" aria-modal="true" aria-labelledby="mdTitle"><div class="md-head"><div><small id="mdKicker">MATCHUP</small><h2 id="mdTitle">GAME DETAILS</h2></div><button class="md-close" type="button" aria-label="Close">×</button></div><div class="md-body" id="mdBody"></div></div></div>');
     const modal=document.querySelector('#matchupDetailModal');
-    const close=()=>{modal.hidden=true;document.body.classList.remove('md-open')};
-    modal.querySelector('.md-close').addEventListener('click',close);modal.querySelector('.md-backdrop').addEventListener('click',close);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
+    const close=()=>{state.request++;modal.hidden=true;document.body.classList.remove('md-open');state.opener?.focus()};
+    modal.querySelector('.md-close').addEventListener('click',close);modal.querySelector('.md-backdrop').addEventListener('click',close);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close();if(e.key==='Tab'&&!modal.hidden){const nodes=[...modal.querySelectorAll('.md-dialog button,.md-dialog summary')],first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
   }
-  async function openMatchup(id){
-    ensureModal();const modal=document.querySelector('#matchupDetailModal'),body=document.querySelector('#mdBody');modal.hidden=false;document.body.classList.add('md-open');document.querySelector('#mdKicker').textContent='WEEK '+weeklyHQ.selected+' // GAME '+id;body.innerHTML='<div class="md-loading">Loading lineups…</div>';
-    const rows=weeklyHQ.weeks.get(weeklyHQ.selected)||[],group=wGroups(rows).find(g=>String(g.id)===String(id));if(!group||group.teams.length<2){body.innerHTML='<div class="md-loading">Matchup data is not available yet.</div>';return}
-    const players=await loadPlayers(),a=group.teams[0],b=group.teams[1],ap=Number(a.points||0),bp=Number(b.points||0);
-    body.innerHTML=scoreHero(a,b)+'<div class="md-desktop-matchup"><div class="md-grid">'+teamPanel(a,players,ap>bp)+'<div class="md-vs">VS</div>'+teamPanel(b,players,bp>ap)+'</div></div>'+mobileHeadToHead(a,b,players);
+  async function openMatchup(id,week=weeklyHQ.selected){
+    state.week=Number(week);state.id=id;const request=++state.request;
+    state.opener=document.activeElement;ensureModal();const modal=document.querySelector('#matchupDetailModal'),body=document.querySelector('#mdBody');modal.hidden=false;document.body.classList.add('md-open');modal.querySelector('.md-close').focus();document.querySelector('#mdKicker').textContent='WEEK '+state.week+' LINEUP // GAME '+id;body.innerHTML='<div class="md-loading">Loading lineups…</div>';
+    const rows=await wLoadWeek(state.week,false),group=wGroups(rows).find(g=>String(g.id)===String(id));if(!group||group.teams.length<2){body.innerHTML='<div class="md-loading">Matchup data is not available yet.</div>';return}
+    await seasonSchedule(state.week);const players=await loadPlayers();if(request!==state.request||modal.hidden)return;const a=group.teams[0],b=group.teams[1],ap=Number(a.points||0),bp=Number(b.points||0);
+    body.classList.toggle('md-prep',seasonMode(state.week)==='PREP');
+    body.innerHTML='<p class="md-lineup-note">Week '+state.week+' lineup · '+(seasonMode(state.week)==='PREP'?'Scores have not started. Projections unavailable from the connected feed.':'Actual Sleeper points; stat corrections may apply.')+'</p>'+scoreHero(a,b)+'<div class="md-desktop-matchup"><div class="md-grid">'+teamPanel(a,players,ap>bp)+'<div class="md-vs">VS</div>'+teamPanel(b,players,bp>ap)+'</div></div>'+mobileHeadToHead(a,b,players);
   }
   function wireCards(){document.querySelectorAll('#weeklyMatchups .matchup-card').forEach(card=>{if(card.dataset.mdReady)return;const id=card.querySelector('.matchup-top span')?.textContent?.replace(/^GAME\s+/,'');if(!id)return;card.dataset.mdReady='1';card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label','Open matchup '+id+' player scores');card.insertAdjacentHTML('beforeend','<div class="md-open-hint">VIEW LINEUPS →</div>');card.addEventListener('click',()=>openMatchup(id));card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openMatchup(id)}})})}
+  document.addEventListener('click',e=>{const card=e.target.closest('[data-matchup]');if(card)openMatchup(card.dataset.matchup,Number(card.dataset.week)).catch(()=>{document.querySelector('#mdBody').textContent='Could not load this matchup. Close and try again.'})});
+  document.addEventListener('keydown',e=>{const card=e.target.closest('[data-matchup]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();card.click()}});
   const obs=new MutationObserver(wireCards);function init(){ensureModal();wireCards();const root=document.querySelector('#weeklyMatchups');if(root)obs.observe(root,{childList:true,subtree:true})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
