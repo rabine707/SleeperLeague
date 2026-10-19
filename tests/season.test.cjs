@@ -23,3 +23,23 @@ test('commissioner overrides include an explicit zero',async()=>{
   vm.runInContext(fs.readFileSync('season.js','utf8')+fs.readFileSync('app-weekly.js','utf8'),c);
   assert.equal((await c.wLoadWeek(1,false))[0].points,0);
 });
+
+test('power board renders preseason, first week and later rank movement',()=>{
+  const elements=new Map();
+  const c=vm.createContext({Intl,Date,Map,Set,console,managers:[],
+    $:selector=>{if(!elements.has(selector))elements.set(selector,{addEventListener(){}});return elements.get(selector)},
+    esc:String,document:{addEventListener(){}}});
+  vm.runInContext(fs.readFileSync('season.js','utf8')+fs.readFileSync('app-weekly.js','utf8'),c);
+  vm.runInContext("weeklyHQ.rosters=[{roster_id:1},{roster_id:2}];weeklyHQ.users=[];",c);
+  const week=(a,b)=>[{roster_id:1,matchup_id:1,points:a},{roster_id:2,matchup_id:1,points:b}];
+  const first=week(10,11),second=week(100,1);
+  for(const history of [[],[first]]){
+    c.wPowerBoard(c.wPower(history),history);
+    assert.equal((elements.get('#weeklyPower').innerHTML.match(/rank-move">NEW/g)||[]).length,2);
+    assert.doesNotMatch(elements.get('#weeklyPower').innerHTML,/NaN|undefined/);
+  }
+  c.wPowerBoard(c.wPower([first,second]),[first,second]);
+  const html=elements.get('#weeklyPower').innerHTML;
+  assert.match(html,/rank-move">▲1/);assert.match(html,/rank-move">▼1/);
+  assert.match(elements.get('#powerFormulaNote').textContent,/Through Week 2/);
+});
