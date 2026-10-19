@@ -61,6 +61,10 @@ Historical scouting is intentionally based only on observable past draft behavio
 
 This is an unofficial fan-made league companion. Sleeper data is fetched from Sleeper's public API.
 
+## Optional private Trade Lab
+
+The unlinked `/trade-lab` workspace adds live roster trade analysis, lineup impact and a league-wide player trade finder. It defaults to Brrr’s House of Ice and Win Now. Access stays disabled until you configure server-side secrets. Unlike the static HQ, the Lab requires Vercel Node.js Functions. See [TRADE-LAB.md](TRADE-LAB.md) for setup, valuation boundaries, local preview and tests.
+
 ## Dynamic season flow
 
 - One shared selected week for home, weekly HQ and existing lineup overlay. The default advances on Tuesday at midnight America/New_York; history stays selected across automatic refreshes. Return with Current week.
