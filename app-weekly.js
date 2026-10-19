@@ -128,8 +128,8 @@ function wAwards(rows,power,week=weeklyHQ.selected){
     wAward("SEASON LUCK","RECORD FILED A COMPLAINT",bad?.m?.team||"—",wCompleted()?(bad.luck>=0?"+":"")+bad.luck.toFixed(2)+" wins vs all-play expectation.":"Activates after Week 1.","purple")
   ].join("");
 }
-function wPowerBoard(power){
-  const n=wCompleted();
+function wPowerBoard(power,history){
+  const n=history.length,previous=n>=2?wPower(history.slice(0,-1)):[];
   $("#weeklyPower").innerHTML=power.map((z,i)=>{
     const luck=(z.luck>=0?"+":"")+z.luck.toFixed(2);
     return'<article class="power-row"><div class="power-rank">'+(i+1)+'<small class="rank-move">'+(n<2?'NEW':rankMovement(previous,z.r.roster_id,i))+'</small></div><img src="'+esc(z.m.avatar)+'" alt=""><div class="power-team"><strong>'+esc(z.m.team)+'</strong><span>'+recordText(z.x)+' · '+z.x.pf.toFixed(1)+' PF</span></div><div class="power-metric"><small>INDEX</small><strong>'+(n?z.power.toFixed(0):"—")+'</strong></div><div class="power-metric"><small>ALL-PLAY</small><strong>'+(n?(z.all*100).toFixed(0)+"%":"—")+'</strong></div><div class="power-metric luck '+(z.luck>.35?"lucky":z.luck<-.35?"unlucky":"")+'"><small>LUCK</small><strong>'+(n?luck:"—")+'</strong></div></article>';
@@ -154,7 +154,7 @@ async function renderWeeklyHQ(force=false){
     await wBasics(force);wControls();const selected=weeklyHQ.selected;
     const [rows,history]=await Promise.all([wLoadWeek(weeklyHQ.selected,force),wHistory()]);
     if(selected!==weeklyHQ.selected){weeklyHQ.rerender=true;return;}
-    const power=wPower(history);wKpis(rows);wMatchups(rows);wAwards(rows,power);wPowerBoard(power);wTable();wPlayoff();homeSeasonStyles();await seasonRender(rows,history,power);
+    const power=wPower(history);wKpis(rows);wMatchups(rows);wAwards(rows,power);wPowerBoard(power,history);wTable();wPlayoff();homeSeasonStyles();await seasonRender(rows,history,power);
     $("#weeklyUpdated").textContent="Updated "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+" · Sleeper public API";wHide();
   }catch(e){
     console.error("Weekly HQ",e);$("#homeWeekEyebrow").textContent="SYNC FAILED · TRY WEEKLY HQ REFRESH";$("#homePulseFooter").textContent="Sleeper unavailable. Displayed results may be stale.";["#weeklyMatchups","#weeklyAwards","#weeklyPower","#weeklyStandings","#weeklyPlayoff"].forEach(s=>{const el=$(s);if(el)el.innerHTML='<div class="weekly-empty"><strong>Couldn’t load Sleeper.</strong><span>'+esc(e.message||"Try refresh.")+'</span></div>'});wHide();
